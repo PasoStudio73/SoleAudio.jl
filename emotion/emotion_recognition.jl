@@ -7,9 +7,12 @@ using StatsBase, Catch22
 using CategoricalArrays
 # using Plots
 
-include("../utils.jl")
+include("../analysis.jl")
+
 include("../audio_utils.jl")
-include("../modal.jl")
+include("../utils.jl")
+# TODO
+# rendi variable names elastica al cambio features
 
 # -------------------------------------------------------------------------- #
 #                             global parameters                              #
@@ -105,12 +108,12 @@ wav_path = "/home/paso/Documents/Aclai/Datasets/emotion_recognition/Ravdess/audi
 #                                   main                                     #
 # -------------------------------------------------------------------------- #
 df = collect_audio_from_folder(wav_path; audioparams=audioparams)
-labels = read_filenames(df, classes_dict, classes_func)
+labels = collect_classes(df, classes_dict, classes_func)
 merge_df_labels!(df, labels)
 sort_df!(df, :length; rev=true)
 df = trimlength_df(df, :label, :length, :audio; min_length=min_length, min_samples=min_samples, sr=audioparams.sr)
 X, y, variable_names = afe(df, featset, audioparams)
-# propositional_analisys(X, y, variable_names, classes)
+prop_sole_dt = propositional_analisys(X, y, variable_names=variable_names, features=features, train_ratio=train_ratio, rng=rng)
 modal_sole_dt = modal_analisys(X, y; variable_names=variable_names, features=features, nwindows=nwindows, relative_overlap=relative_overlap, train_ratio=train_ratio, rng=rng)
 
 @info("Done.")

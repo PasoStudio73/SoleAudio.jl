@@ -8,7 +8,101 @@
 # using Plots
 
 # ---------------------------------------------------------------------------- #
-#                      handling of nan values functions                        #
+#                           propositional structures                           #
+# ---------------------------------------------------------------------------- #
+propositional_feature_dict = Dict(
+    :catch9 => [
+        maximum,
+        minimum,
+        StatsBase.mean,
+        median,
+        std,
+        Catch22.SB_BinaryStats_mean_longstretch1,
+        Catch22.SB_BinaryStats_diff_longstretch0,
+        Catch22.SB_MotifThree_quantile_hh,
+        Catch22.SB_TransitionMatrix_3ac_sumdiagcov,
+    ],
+    :minmax => [
+        maximum,
+        minimum,
+    ],
+    :custom => [
+        maximum,
+        # minimum,
+        # StatsBase.mean,
+        # median,
+        std,
+        # Catch22.SB_BinaryStats_mean_longstretch1,
+        # Catch22.SB_BinaryStats_diff_longstretch0,
+        # Catch22.SB_MotifThree_quantile_hh,
+        # Catch22.SB_TransitionMatrix_3ac_sumdiagcov,
+        Catch22.DN_HistogramMode_5,
+        Catch22.CO_f1ecac,
+        Catch22.CO_HistogramAMI_even_2_5,
+    ]
+)
+
+f_dict_string = Dict(
+    maximum => "max",
+    minimum => "min",
+    StatsBase.mean => "mean",
+    median => "med",
+    std => "std",
+    Catch22.SB_BinaryStats_mean_longstretch1 => "mean_ls",
+    Catch22.SB_BinaryStats_diff_longstretch0 => "diff_ls",
+    Catch22.SB_MotifThree_quantile_hh => "qnt",
+    Catch22.SB_TransitionMatrix_3ac_sumdiagcov => "sdiag",
+    Catch22.DN_HistogramMode_5 => "hist",
+    Catch22.CO_f1ecac => "f1ecac",
+    Catch22.CO_HistogramAMI_even_2_5 => "",
+)
+
+Tree = MLJ.@load DecisionTreeClassifier pkg=DecisionTree
+
+# ---------------------------------------------------------------------------- #
+#                             propositional analysis                           #
+# ---------------------------------------------------------------------------- #
+function propositional_analisys(
+    X::DataFrame,
+    y::CategoricalArray;
+    variable_names::AbstractVector{String},
+    features::Symbol=:catch9,
+    train_ratio::Float64=0.8,
+    rng::AbstractRNG=Random.GLOBAL_RNG
+)
+    metaconditions = get(propositional_feature_dict, features) do
+        error("Unknown set of features: $features.")
+    end
+
+    p_variable_names = [
+        string(m[1], f_dict_string[j], "(", m[2], ")", m[3])
+        for i in variable_names
+        for j in metaconditions
+        for m in [match(r_split, i)]
+    ]
+    
+    X_propos = DataFrame([name => Float64[] for name in [match(r_select, v)[1] for v in p_variable_names]])
+    push!(X_propos, vcat([vcat([map(func, Array(row)) for func in metaconditions]...) for row in eachrow(X)])...)
+
+    X_train, y_train, X_test, y_test = partitioning(X_propos, y; train_ratio=train_ratio, rng=rng)
+
+    @info("Propositional analysis: train model...")
+    learned_dt_tree = begin
+        model = Tree(; max_depth=-1, )
+        mach = machine(model, X_train, y_train)
+        fit!(mach)
+        fitted_params(mach).tree
+    end
+    
+    sole_dt = solemodel(learned_dt_tree)
+    apply!(sole_dt, X_test, y_test)
+    # printmodel(sole_dt; show_metrics = true, variable_names_map = variable_names)
+
+    sole_dt
+end
+
+# ---------------------------------------------------------------------------- #
+#                              modal structures                                #
 # ---------------------------------------------------------------------------- #
 function mean_longstretch1(x) Catch22.SB_BinaryStats_mean_longstretch1((x)) end
 function diff_longstretch0(x) Catch22.SB_BinaryStats_diff_longstretch0((x)) end
@@ -50,7 +144,7 @@ for f_name in nan_guard
     end)
 end
 
-const feature_dict = Dict(
+modal_feature_dict = Dict(
     :catch9 => [
         (≥, get_patched_feature(maximum, :+)),            (≤, get_patched_feature(maximum, :-)),
         (≥, get_patched_feature(minimum, :+)),            (≤, get_patched_feature(minimum, :-)),
@@ -105,7 +199,7 @@ function modal_analisys(
     X_train, y_train, X_test, y_test = partitioning(X_windowed, y; train_ratio=train_ratio, rng=rng)
 
     @info("Modal analysis: train model...")
-    metaconditions = get(feature_dict, features) do
+    metaconditions = get(modal_feature_dict, features) do
         error("Unknown set of features: $features.")
     end
 

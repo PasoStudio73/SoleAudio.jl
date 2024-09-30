@@ -10,49 +10,22 @@
 # ---------------------------------------------------------------------------- #
 #                                data structures                               #
 # ---------------------------------------------------------------------------- #
-const catch9 = [
-    maximum,
-    minimum,
-    StatsBase.mean,
-    median,
-    std,
-    Catch22.SB_BinaryStats_mean_longstretch1,
-    Catch22.SB_BinaryStats_diff_longstretch0,
-    Catch22.SB_MotifThree_quantile_hh,
-    Catch22.SB_TransitionMatrix_3ac_sumdiagcov,
-]
+catch9_f = ["max", "min", "mean", "med", "std", "bsm", "bsd", "qnt", "3ac"]
 
-const catch9_f = ["max", "min", "mean", "med", "std", "bsm", "bsd", "qnt", "3ac"]
+color_code = Dict(:red => 31, :green => 32, :yellow => 33, :blue => 34, :magenta => 35, :cyan => 36)
+r_select = r"\e\[\d+m(.*?)\e\[0m"
+r_split = r"(\e\[[\d;]*m)(.*?)(\e\[0m)"
 
-const color_code = Dict(:red => 31, :green => 32, :yellow => 33, :blue => 34, :magenta => 35, :cyan => 36)
-const r_select = r"\e\[\d+m(.*?)\e\[0m"
-
-
-function vnames_builder(featset::Tuple, audioparams::NamedTuple; type::Symbol=modal, freq::AbstractVector{Int})
-    if type == :propositional
-        return vcat([
-            vcat(
-                ["\e[$(color_code[:yellow])m$j(mel$i=$(freq[i])Hz)\e[0m" for i in 1:audioparams.mel_nbands],
-                :mfcc in featset ? ["\e[$(color_code[:red])m$j(mfcc$i)\e[0m" for i in 1:audioparams.mfcc_ncoeffs] : String[],
-                :f0 in featset ? ["\e[$(color_code[:green])m$j(f0)\e[0m"] : String[],
-                "\e[$(color_code[:cyan])m$j(cntrd)\e[0m", "\e[$(color_code[:cyan])m$j(crest)\e[0m",
-                "\e[$(color_code[:cyan])m$j(entrp)\e[0m", "\e[$(color_code[:cyan])m$j(flatn)\e[0m", "\e[$(color_code[:cyan])m$j(flux)\e[0m",
-                "\e[$(color_code[:cyan])m$j(kurts)\e[0m", "\e[$(color_code[:cyan])m$j(rllff)\e[0m", "\e[$(color_code[:cyan])m$j(skwns)\e[0m",
-                "\e[$(color_code[:cyan])m$j(decrs)\e[0m", "\e[$(color_code[:cyan])m$j(slope)\e[0m", "\e[$(color_code[:cyan])m$j(sprd)\e[0m"
-            )
-            for j in catch9_f
-        ]...)
-    else
-        return vcat(
-            ["\e[$(color_code[:yellow])mmel$i=$(freq[i])Hz\e[0m" for i in 1:audioparams.mel_nbands],
-            :mfcc in featset ? ["\e[$(color_code[:red])mmfcc$i\e[0m" for i in 1:audioparams.mfcc_ncoeffs] : String[],
-            :f0 in featset ? ["\e[$(color_code[:green])mf0\e[0m"] : String[],
-            "\e[$(color_code[:cyan])mcntrd\e[0m", "\e[$(color_code[:cyan])mcrest\e[0m",
-            "\e[$(color_code[:cyan])mentrp\e[0m", "\e[$(color_code[:cyan])mflatn\e[0m", "\e[$(color_code[:cyan])mflux\e[0m",
-            "\e[$(color_code[:cyan])mkurts\e[0m", "\e[$(color_code[:cyan])mrllff\e[0m", "\e[$(color_code[:cyan])mskwns\e[0m",
-            "\e[$(color_code[:cyan])mdecrs\e[0m", "\e[$(color_code[:cyan])mslope\e[0m", "\e[$(color_code[:cyan])msprd\e[0m"
-        )
-    end
+function vnames_builder(featset::Tuple, audioparams::NamedTuple; freq::AbstractVector{Int})
+    vcat(
+        ["\e[$(color_code[:yellow])mmel$i=$(freq[i])Hz\e[0m" for i in 1:audioparams.mel_nbands],
+        :mfcc in featset ? ["\e[$(color_code[:red])mmfcc$i\e[0m" for i in 1:audioparams.mfcc_ncoeffs] : String[],
+        :f0 in featset ? ["\e[$(color_code[:green])mf0\e[0m"] : String[],
+        "\e[$(color_code[:cyan])mcntrd\e[0m", "\e[$(color_code[:cyan])mcrest\e[0m",
+        "\e[$(color_code[:cyan])mentrp\e[0m", "\e[$(color_code[:cyan])mflatn\e[0m", "\e[$(color_code[:cyan])mflux\e[0m",
+        "\e[$(color_code[:cyan])mkurts\e[0m", "\e[$(color_code[:cyan])mrllff\e[0m", "\e[$(color_code[:cyan])mskwns\e[0m",
+        "\e[$(color_code[:cyan])mdecrs\e[0m", "\e[$(color_code[:cyan])mslope\e[0m", "\e[$(color_code[:cyan])msprd\e[0m"
+    )
 end
 
 # ---------------------------------------------------------------------------- #
@@ -113,7 +86,7 @@ function afe(
     @info("Collect audio features...")
 
     freq = round.(Int, audio_features(df[1, source_label], audioparams.sr; featset=(:get_only_freqs), audioparams...))
-    variable_names = vnames_builder(featset, audioparams; type=:modal, freq=freq)
+    variable_names = vnames_builder(featset, audioparams; freq=freq)
 
     # audiofeats = [audio_features(row[source_label], audioparams.sr; featset=featset, params=audioparams) for row in eachrow(df)]
     # X = DataFrame(label => String[])

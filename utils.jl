@@ -122,6 +122,19 @@ function group_df(df::DataFrame, splitlabel::Symbol, keep_only::AbstractVector{S
     group_df(sub_df, splitlabel)
 end
 
+function collect_classes(df::DataFrame, classes_dict::Dict, classes_func::Function; fname::Symbol=:filename, label::Symbol=:label)
+    hasproperty(df, fname) || throw(ArgumentError("Column '$fname' does not exist in the DataFrame"))
+
+    labels = map(row -> classes_func(row), eachrow(df))
+
+    if !all(l -> haskey(classes_dict, l), labels)
+        missing_keys = setdiff(Set(labels), keys(classes_dict))
+        throw(KeyError("The following keys are missing from classes_dict: $missing_keys"))
+    end
+
+    DataFrame(Symbol(fname) => df[!, fname], Symbol(label) => map(l -> classes_dict[l], labels))
+end
+
 function trimlength_df(df::DataFrame, splitlabel::Symbol, lengthlabel::Symbol, audiolabel::Symbol; sortby::Union{Symbol, Nothing}=nothing, min_length::Int64=0, min_samples::Int64=100, sr::Int64=8000)
     hasproperty(df, splitlabel) ||  throw(ArgumentError("The specified splitlabel, $splitlabel does not exist in the DataFrame."))
     hasproperty(df, lengthlabel) || throw(ArgumentError("The specified lengthlabel, $lengthlabel does not exist in the DataFrame."))
@@ -163,19 +176,6 @@ function trimlength_df(df::DataFrame, splitlabel::Symbol, lengthlabel::Symbol, a
     println("Sample length: $(round(sample_length_seconds, digits=2)) seconds")
 
     return df
-end
-
-function read_filenames(df::DataFrame, classes_dict::Dict, classes_func::Function; fname::Symbol=:filename, label::Symbol=:label)
-    hasproperty(df, fname) || throw(ArgumentError("Column '$fname' does not exist in the DataFrame"))
-
-    labels = map(row -> classes_func(row), eachrow(df))
-
-    if !all(l -> haskey(classes_dict, l), labels)
-        missing_keys = setdiff(Set(labels), keys(classes_dict))
-        throw(KeyError("The following keys are missing from classes_dict: $missing_keys"))
-    end
-
-    DataFrame(Symbol(fname) => df[!, fname], Symbol(label) => map(l -> classes_dict[l], labels))
 end
 
 function merge_df_labels!(df::DataFrame, labels::DataFrame; id::Union{Symbol, Nothing}=:filename, id_labels::Symbol=:label)
