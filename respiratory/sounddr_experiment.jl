@@ -49,7 +49,7 @@ merge_df_csv!(df, csvdf; id_df=ids[1], id_csv=ids[2])
 
 get_audio_length!(df, :audio, :audio_length)
 trm_df = trimlength_df(df, :label, :audio_length, :audio; min_length=min_length, min_samples=min_samples)
-afe_df = audio_features(trm_df, audioparams)
+afe_df = audio_features(trm_df; audioparams=audioparams)
 
 y = trm_df[:, :label]
 X = DataFrame()
