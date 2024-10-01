@@ -28,6 +28,7 @@ format_float(x) = replace(x, r"(\d+\.\d+)" => s -> @sprintf("%.3f", parse(Float6
 function interesting_rules(
     prop_sole_dt::Union{DecisionTree, Nothing}=nothing,
     modal_sole_dt::Union{DecisionTree, Nothing}=nothing;
+    features::Symbol,
     variable_names::AbstractVector{String},
 )
     if !isnothing(prop_sole_dt)

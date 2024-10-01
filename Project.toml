@@ -1,1 +1,28 @@
+name = "SoleAudio"
+uuid = "d120907c-de53-4f76-92ff-8a3cfb847171"
+authors = ["Riccardo Pasini"]
+version = "1.0.0-DEV"
+
 [deps]
+Audio911 = "5540a74f-91b5-427e-9d31-931d77bf3639"
+CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
+Catch22 = "acdeb78f-3d39-4310-8fdf-6d75c17c6d5a"
+CategoricalArrays = "324d7699-5711-5eae-9e2f-1d82baa6b597"
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
+MLJ = "add582a8-e3ab-11e8-2d5e-e98b27df1bc7"
+MLJDecisionTreeInterface = "c6f25543-311c-4c74-83dc-3ea6d1015661"
+ModalDecisionTrees = "e54bda2e-c571-11ec-9d64-0242ac120002"
+Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+SoleDecisionTreeInterface = "de8eae22-3630-40e0-868c-abfc4c1bb3da"
+StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
+
+[compat]
+julia = "1.6.7"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
