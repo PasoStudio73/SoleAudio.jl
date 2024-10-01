@@ -89,8 +89,7 @@ function propositional_analisys(
     @info("Propositional analysis: train model...")
     learned_dt_tree = begin
         model = Tree(; max_depth=-1, )
-        mach = machine(model, X_train, y_train)
-        fit!(mach)
+        mach = machine(model, X_train, y_train) |> fit!
         fitted_params(mach).tree
     end
     
@@ -208,9 +207,8 @@ function modal_analisys(
         mach = machine(model, X_train, y_train) |> fit!
     end
     
-    report(learned_dt_tree).printmodel(variable_names_map=variable_names)
+    # report(learned_dt_tree).printmodel(variable_names_map=variable_names)
     _, mtree = report(mach).sprinkle(X_test, y_test)
-    # sole_dt = ModalDecisionTrees.translate(mtree)
     # printmodel(sole_dt; show_metrics = true, variable_names_map=variable_names)
 
     ModalDecisionTrees.translate(mtree)
