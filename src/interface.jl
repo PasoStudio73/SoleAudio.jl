@@ -3,22 +3,48 @@
 # -------------------------------------------------------------------------- #
 function get_interesting_rules(;
     wav_path::String,
-    csv_path::Union{String, Nothing}=nothing,
+    csv_file::Union{String, Nothing}=nothing,
+    # labels settings
     classes_dict::Dict{String, String},
-    classes_func::Function,
-    featset::Tuple,
-    audioparams::NamedTuple,
+    classes_func::Union{Function, Nothing}=nothing,
+    fragmented::Bool=false,
+    frag_func::Union{Function, Nothing}=nothing,
+    header::Bool=false,
+    # merge df labels settings
+    sort_before_merge::Bool=true, 
+    id_df::Symbol=:filename, 
+    id_labels::Symbol=:filename,
+    label_df::Symbol=:label,
+    label_labels::Symbol=:label,
+    # audio settings
+    featset::Tuple=(:mel, :mfcc, :f0, :spectrals),
+    audioparams::NamedTuple=let sr=8000
+        (
+            sr = sr,
+            norm = true,
+            speech_detect = true,
+            sdetect_thresholds=(0,0), 
+            sdetect_spread_threshold=0.02,
+            nfft = 256,
+            mel_scale = :mel_htk, # :mel_htk, :mel_slaney, :erb, :bark, :semitones, :tuned_semitones
+            mel_nbands = 26,
+            mfcc_ncoeffs = 13,
+            mel_freqrange = (0, round(Int, sr / 2)),
+        )
+    end,
     min_length::Int64,
     min_samples::Int64,
-    features::Symbol,
-    nwindows::Int64,
-    relative_overlap::Float64,
-    train_ratio::Float64,
-    rng::AbstractRNG,
+    features::Symbol=:catch9,
+    nwindows::Int64=20,
+    relative_overlap::Float64=0.05,
+    train_ratio::Float64=0.8,
+    rng::AbstractRNG=Random.MersenneTwister(11),
 )
-    df = collect_audio_from_folder(wav_path; audioparams=audioparams)
-    labels = collect_classes(df, classes_dict, classes_func)
-    merge_df_labels!(df, labels)
+    df = collect_audio_from_folder(wav_path; audioparams=audioparams, fragmented=fragmented, frag_func=frag_func)
+    labels = isnothing(csv_file) ? 
+        collect_classes(df, classes_dict; classes_func=classes_func) : 
+        collect_classes(csv_file, classes_dict; id_labels=id_labels, label_labels=label_labels, header=header)
+    merge_df_labels!(df, labels; sort_before_merge=sort_before_merge, id_df=id_df, id_labels=id_labels, label_df=label_df, label_labels=label_labels)
     sort_df!(df, :length; rev=true)
     df = trimlength_df(df, :label, :length, :audio; min_length=min_length, min_samples=min_samples, sr=audioparams.sr)
     X, y, variable_names = afe(df, featset, audioparams)

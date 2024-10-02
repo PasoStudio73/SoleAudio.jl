@@ -18,4 +18,6 @@ include("interface.jl")
 
 export get_interesting_rules
 
+export collect_audio_from_folder
+
 end

@@ -101,38 +101,57 @@ end
 # ---------------------------------------------------------------------------- #
 #                               dataframe utils                                #
 # ---------------------------------------------------------------------------- #
-function group_df(grouped_df::GroupedDataFrame{DataFrame}, label::Symbol)
-    @info "Balancing classes..."
-    nsamples = minimum(nrow, grouped_df)
+# function group_df(grouped_df::GroupedDataFrame{DataFrame}, label::Symbol)
+#     @info "Balancing classes..."
+#     nsamples = minimum(nrow, grouped_df)
 
-    combine(grouped_df) do i
-        first(i, nsamples)
+#     combine(grouped_df) do i
+#         first(i, nsamples)
+#     end
+# end
+
+# function group_df(df::DataFrame, splitlabel::Symbol; sortby::Union{Symbol, Nothing}=nothing)
+#     !isnothing(sortby) && sort!(df, sortby, rev=true)
+#     grouped_df = groupby(df, splitlabel)
+#     group_df(grouped_df, splitlabel)
+# end
+
+# function group_df(df::DataFrame, splitlabel::Symbol, keep_only::AbstractVector{String})
+#     df = filter(row -> row[splitlabel] in keep_only, df)
+#     sub_df = groupby(df, splitlabel)
+#     group_df(sub_df, splitlabel)
+# end
+
+function collect_classes(
+    df::DataFrame, 
+    classes_dict::Dict;
+    classes_func::Union{Function, Nothing}=nothing,
+    id_labels::Symbol=:filename, 
+    label_labels::Symbol=:label
+)
+    hasproperty(df, id_labels) || throw(ArgumentError("Column '$id_labels' does not exist in the DataFrame"))
+
+    if !isnothing(classes_func)
+        labels = map(row -> classes_func(row), eachrow(df))
+    else
+        labels = df[!, label_labels]
     end
+
+    DataFrame(
+        Symbol(id_labels) => df[!, id_labels],
+        Symbol(label_labels) => map(l -> get(classes_dict, l, missing), labels)
+    )
 end
 
-function group_df(df::DataFrame, splitlabel::Symbol; sortby::Union{Symbol, Nothing}=nothing)
-    !isnothing(sortby) && sort!(df, sortby, rev=true)
-    grouped_df = groupby(df, splitlabel)
-    group_df(grouped_df, splitlabel)
-end
-
-function group_df(df::DataFrame, splitlabel::Symbol, keep_only::AbstractVector{String})
-    df = filter(row -> row[splitlabel] in keep_only, df)
-    sub_df = groupby(df, splitlabel)
-    group_df(sub_df, splitlabel)
-end
-
-function collect_classes(df::DataFrame, classes_dict::Dict, classes_func::Function; fname::Symbol=:filename, label::Symbol=:label)
-    hasproperty(df, fname) || throw(ArgumentError("Column '$fname' does not exist in the DataFrame"))
-
-    labels = map(row -> classes_func(row), eachrow(df))
-
-    if !all(l -> haskey(classes_dict, l), labels)
-        missing_keys = setdiff(Set(labels), keys(classes_dict))
-        throw(KeyError("The following keys are missing from classes_dict: $missing_keys"))
-    end
-
-    DataFrame(Symbol(fname) => df[!, fname], Symbol(label) => map(l -> classes_dict[l], labels))
+function collect_classes(
+    csv_file::String, 
+    classes_dict::Dict; 
+    id_labels::Symbol=:filename, 
+    label_labels::Symbol=:label, 
+    header::Bool=false
+)
+    df = CSV.read(csv_file, DataFrame, header=header)
+    collect_classes(df, classes_dict; id_labels=id_labels, label_labels=label_labels)
 end
 
 function trimlength_df(df::DataFrame, splitlabel::Symbol, lengthlabel::Symbol, audiolabel::Symbol; sortby::Union{Symbol, Nothing}=nothing, min_length::Int64=0, min_samples::Int64=100, sr::Int64=8000)
@@ -178,11 +197,25 @@ function trimlength_df(df::DataFrame, splitlabel::Symbol, lengthlabel::Symbol, a
     return df
 end
 
-function merge_df_labels!(df::DataFrame, labels::DataFrame; id::Union{Symbol, Nothing}=:filename, id_labels::Symbol=:label)
+function merge_df_labels!(
+    df::DataFrame, 
+    labels::DataFrame;
+    sort_before_merge::Bool=true, 
+    id_df::Symbol=:filename, 
+    id_labels::Symbol=:filename,
+    label_df::Symbol=:label,
+    label_labels::Symbol=:label,
+)
     size(df, 1) == size(labels, 1) || throw(ArgumentError("DataFrame and Labels must have the same number of rows."))
-    all(df[!, id] .== labels[!, id]) || throw(ArgumentError("IDs in DataFrame and Labels do not match row by row."))
 
-    insertcols!(df, id_labels => labels[!, id_labels])
+    sort_before_merge && begin
+        sort!(df, id_df)
+        sort!(labels, id_labels)
+    end
+    all(df[!, id_df] .== string.(labels[!, id_labels])) || throw(ArgumentError("IDs in DataFrame and Labels do not match row by row."))
+
+    insertcols!(df, label_df => labels[!, label_labels])
+    dropmissing!(df, label_df)
 end
 
 sort_df!(df::DataFrame, col::Symbol; rev::Bool=false) = sort!(df, col; rev=rev)

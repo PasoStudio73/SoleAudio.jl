@@ -35,7 +35,7 @@ end
 # ---------------------------------------------------------------------------- #
 params(x::Dict, audioparams::NamedTuple) = (x[k] => getfield(audioparams, Symbol(k)) for k in keys(x) if haskey(audioparams, Symbol(k)))
 
-function _collect_audio_from_folder!(df::DataFrame, path::String; audioparams::NamedTuple)
+function walk_audio_dir!(df::DataFrame, path::String; audioparams::NamedTuple)
     norm = get(audioparams, :norm, false)
     speech_detect = get(audioparams, :speech_detect, false)
     sd_params = Dict(:sd_thr => :thresholds, :sd_spread_thr => :spread_threshold)
@@ -45,6 +45,32 @@ function _collect_audio_from_folder!(df::DataFrame, path::String; audioparams::N
             audio = load_audio(joinpath(root, file), audioparams.sr; norm=norm)
             speech_detect && begin audio, _ = speech_detector(audio; params(sd_params, audioparams)...) end
             push!(df, hcat(split(file, ".")[1], size(audio.data, 1), [audio.data]))
+        end
+    end
+end
+
+function _collect_audio_from_folder!(
+    df::DataFrame, 
+    path::String; 
+    audioparams::NamedTuple,
+    fragmented::Bool=false,
+    frag_func::Union{Function, Nothing}=nothing,
+)
+    if !fragmented
+        walk_audio_dir!(df, path; audioparams=audioparams)
+    else
+        !isnothing(frag_func) || throw(ArgumentError("`frag_func` must be provided when `fragmented=true`"))
+
+        @info "Defragmenting audio files..."
+        dff = DataFrame(filename=String[], length=Int64[], audio=AbstractArray{<:AbstractFloat}[])
+        walk_audio_dir!(dff, path; audioparams=audioparams)
+
+        dff.group = map(x -> split(x, "_")[1], dff.filename)
+        grouped_dff = groupby(dff, :group)
+
+        for i in grouped_dff
+            audiodata = vcat(i.audio...)
+            push!(df, hcat(frag_func(i.filename[1]), size(audiodata, 1), [audiodata]))
         end
     end
 end
@@ -81,9 +107,6 @@ function afe(
     audioparams::NamedTuple;
     label::Symbol=:label,
     source_label::Symbol=:audio, 
-    sr_label::Symbol=:sr, 
-    dest_label::Symbol=:afe, 
-    kwargs...
 )
     @info("Collect audio features...")
 
