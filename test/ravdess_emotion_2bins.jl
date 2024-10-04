@@ -10,10 +10,11 @@ using SoleAudio, Random
 # -------------------------------------------------------------------------- #
 #                       experiment specific parameters                       #
 # -------------------------------------------------------------------------- #
-wav_path = "/home/paso/Documents/Aclai/Datasets/emotion_recognition/Ravdess/audio_speech_actors_01-24"
+# wav_path = "/home/paso/Documents/Aclai/Datasets/emotion_recognition/Ravdess/audio_speech_actors_01-24"
+wav_path = "/home/paso/datasets/emotion_recognition/Ravdess/audio_speech_actors_01-24"
 
-# classes = :emo2bins
-classes = :emo3bins
+classes = :emo2bins
+# classes = :emo3bins
 # classes = :emo8bins
 
 if classes == :emo2bins
@@ -75,8 +76,8 @@ end
 # min_samples = 400
 
 # only for debugging
-min_length = 17000
-min_samples = 6
+min_length = 11000
+min_samples = 500
 
 features = :catch9
 # features = :minmax
@@ -108,3 +109,5 @@ irules = get_interesting_rules(
     train_ratio=train_ratio,
     rng=rng,
 )
+
+jldsave("ravdess_emotion_2bins.jld2", true; irules)

@@ -47,6 +47,8 @@ function interesting_rules(
         map(r->(consequent(r), readmetrics(r)), irules)
         p_irules = sort(irules, by=readmetrics)
 
+        isempty(p_irules) && throw(ArgumentError("No interesting rules found."))
+        
         p_X = DataFrame(antecedent=String[], consequent=String[]; [name => Vector{Union{Float64, Int}}() for name in keys(readmetrics(p_irules[1]))]...)
 #         p_X = DataFrame(
 #     antecedent = String[],

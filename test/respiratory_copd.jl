@@ -9,12 +9,15 @@ using SoleAudio, Random
 # -------------------------------------------------------------------------- #
 #                       experiment specific parameters                       #
 # -------------------------------------------------------------------------- #
-wav_path ="/home/paso/Documents/Aclai/Datasets/health_recognition/Respiratory_Sound_Database/audio_partitioned"
-csv_path = "/home/paso/Documents/Aclai/Datasets/health_recognition/Respiratory_Sound_Database"
+# wav_path ="/home/paso/Documents/Aclai/Datasets/health_recognition/Respiratory_Sound_Database/audio_partitioned"
+# csv_path = "/home/paso/Documents/Aclai/Datasets/health_recognition/Respiratory_Sound_Database"
+wav_path ="/home/paso/datasets/health_recognition/Respiratory_Sound_Database/audio_partitioned"
+csv_path = "/home/paso/datasets/health_recognition/Respiratory_Sound_Database"
+
 csv_file = csv_path * "/" * "patient_diagnosis.csv"
 
-classes = :Pneumonia
-# classes = :COPD
+# classes = :Pneumonia
+classes = :COPD
 # classes = :URTI
 # classes = :Bronchiectasis
 # classes = :Bronchiolitis
@@ -123,3 +126,5 @@ irules = get_interesting_rules(
     train_ratio=train_ratio,
     rng=rng,
 )
+
+jldsave("respiratory_copd.jld2", true; irules)
