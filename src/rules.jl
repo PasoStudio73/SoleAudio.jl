@@ -47,22 +47,21 @@ function interesting_rules(
         map(r->(consequent(r), readmetrics(r)), irules)
         p_irules = sort(irules, by=readmetrics)
 
-        isempty(p_irules) && throw(ArgumentError("No interesting rules found."))
+        isempty(p_irules) && return nothing
         
-        p_X = DataFrame(antecedent=String[], consequent=String[]; [name => Vector{Union{Float64, Int}}() for name in keys(readmetrics(p_irules[1]))]...)
+        p_X = DataFrame(antecedent=String[], consequent=String[]; [name => Vector{Union{Float64, Int}}() for name in keys(readmetrics(p_irules[1]))]..., type=String[])
 #         p_X = DataFrame(
 #     antecedent = String[],
 #     consequent = String[],
 #     [name => Vector{Union{Float64, Int}}() for name in keys(readmetrics(p_irules[1]))]...
 # )
 
-
         for i in eachrow(p_irules)
             a_c = match(r_p_divide, string(i[1]))
             antecedent, consequent = a_c[1], a_c[3]
             antecedent = reduce((s, r) -> replace(s, r => ""), r_p_ant, init=antecedent)
             antecedent = format_float(antecedent)
-            push!(p_X, (antecedent, consequent, readmetrics(i[1])...))
+            push!(p_X, (antecedent, consequent, readmetrics(i[1])..., "propositional"))
         end
     else
         p_X = nothing
@@ -81,7 +80,7 @@ function interesting_rules(
         map(r->(r, readmetrics(r)), irules)
         m_irules = sort(irules, by=readmetrics)
 
-        m_X = DataFrame(antecedent=String[], consequent=String[]; [name => Vector{Union{Float64, Int}}() for name in keys(readmetrics(m_irules[1]))]...)
+        m_X = DataFrame(antecedent=String[], consequent=String[]; [name => Vector{Union{Float64, Int}}() for name in keys(readmetrics(m_irules[1]))]..., type=String[])
         for i in eachrow(m_irules)
             consequent = match(r_cons, string(i[1].consequent))[1]
             # antecedent = foldl((s, r) -> replace(s, r => ""), r_antecedent, init=string(i[1].antecedent))
@@ -98,7 +97,7 @@ function interesting_rules(
                 end)
             end
             antecedent = format_float(antecedent)
-            push!(m_X, (antecedent, consequent, readmetrics(i[1])...))
+            push!(m_X, (antecedent, consequent, readmetrics(i[1])..., "modal"))
         end
     else
         m_X = nothing

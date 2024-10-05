@@ -16,10 +16,10 @@ csv_path = "/home/paso/datasets/health_recognition/Respiratory_Sound_Database"
 
 csv_file = csv_path * "/" * "patient_diagnosis.csv"
 
-classes = :Pneumonia
+# classes = :Pneumonia
 # classes = :COPD
 # classes = :URTI
-# classes = :Bronchiectasis
+classes = :Bronchiectasis
 # classes = :Bronchiolitis
 # classes = :resp4bins
 
@@ -78,14 +78,14 @@ audioparams = let sr = 8000
         speech_detect = false,
         nfft = 256,
         mel_scale = :mel_htk, # :mel_htk, :mel_slaney, :erb, :bark, :semitones, :tuned_semitones
-        mel_nbands = 26,
-        mfcc_ncoeffs = 13,
+        mel_nbands = 14,
+        mfcc_ncoeffs = 7,
         mel_freqrange = (300, round(Int, sr / 2)),
     )
 end
 
-min_length = 310000
-min_samples = 6
+min_length = 140000
+min_samples = 7
 
 features = :catch9
 # features = :minmax

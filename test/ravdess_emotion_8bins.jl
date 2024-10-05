@@ -2,11 +2,6 @@ using DataFrames, JLD2
 using SoleAudio, Random
 # using Plots
 
-# TODO
-# scrivi un file text con tutti i settaggi usati
-# output formattato per latex su un file.tex
-# fra gli algoritmi di f0 includi il pagliarini
-
 # -------------------------------------------------------------------------- #
 #                       experiment specific parameters                       #
 # -------------------------------------------------------------------------- #
@@ -49,6 +44,8 @@ elseif classes == :emo8bins
     )
 end
 
+jld2_file = string("ravdess_", classes)
+
 # classes will be taken from audio filename, no csv available
 classes_func(row) = match(r"^(?:[^-]*-){2}([^-]*)", row.filename)[1]
 
@@ -66,18 +63,14 @@ audioparams = let sr = 8000
         sdetect_spread_threshold=0.02,
         nfft = 256,
         mel_scale = :mel_htk, # :mel_htk, :mel_slaney, :erb, :bark, :semitones, :tuned_semitones
-        mel_nbands = 26,
-        mfcc_ncoeffs = 13,
-        mel_freqrange = (0, round(Int, sr / 2)),
+        mel_nbands = 20,
+        mfcc_ncoeffs = 10,
+        mel_freqrange = (100, round(Int, sr / 2)),
     )
 end
 
-# min_length = 11500
-# min_samples = 400
-
-# only for debugging
-min_length = 12000
-min_samples = 46
+min_length = 11500
+min_samples = 50
 
 features = :catch9
 # features = :minmax
@@ -89,16 +82,22 @@ relative_overlap = 0.05
 
 # partitioning
 train_ratio = 0.8
-train_seed = 11
+train_seed = 1
 rng = Random.MersenneTwister(train_seed)
+Random.seed!(train_seed)
 
 # -------------------------------------------------------------------------- #
 #                                   main                                     #
 # -------------------------------------------------------------------------- #
-irules = get_interesting_rules(
+df = get_df_from_rawaudio(
     wav_path=wav_path,
     classes_dict=classes_dict,
     classes_func=classes_func,
+    audioparams=audioparams,
+)
+
+irules = get_interesting_rules(
+    df;
     featset=featset,
     audioparams=audioparams,
     min_length=min_length,
@@ -110,4 +109,7 @@ irules = get_interesting_rules(
     rng=rng,
 )
 
-jldsave("ravdess_emotion_8bins.jld2", true; irules)
+println(irules)
+
+jldsave(jld2_file * ".jld2", true; irules)
+@info "Done."

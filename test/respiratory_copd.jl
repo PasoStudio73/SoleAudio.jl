@@ -23,6 +23,8 @@ classes = :COPD
 # classes = :Bronchiolitis
 # classes = :resp4bins
 
+jld2_file = string("respiratory_", classes)
+
 if classes == :Pneumonia
     classes_dict = Dict{String,String}(
         "Pneumonia" => "sick",
@@ -73,23 +75,17 @@ audioparams = let sr = 8000
     (
         sr = sr,
         norm = true,
-        speech_detect = true,
-        sdetect_thresholds=(0,0), 
-        sdetect_spread_threshold=0.02,
+        speech_detect = false,
         nfft = 256,
-        mel_scale = :mel_htk, # :mel_htk, :mel_slaney, :erb, :bark, :semitones, :tuned_semitones
+        mel_scale = :semitones, # :mel_htk, :mel_slaney, :erb, :bark, :semitones, :tuned_semitones
         mel_nbands = 26,
         mfcc_ncoeffs = 13,
-        mel_freqrange = (0, round(Int, sr / 2)),
+        mel_freqrange = (300, round(Int, sr / 2)),
     )
 end
 
-# min_length = 11500
-# min_samples = 400
-
-# only for debugging
-min_length = 16000
-min_samples = 6
+min_length = 120000
+min_samples = 26
 
 features = :catch9
 # features = :minmax
@@ -101,13 +97,14 @@ relative_overlap = 0.05
 
 # partitioning
 train_ratio = 0.8
-train_seed = 11
+train_seed = 1
 rng = Random.MersenneTwister(train_seed)
+Random.seed!(train_seed)
 
 # -------------------------------------------------------------------------- #
 #                                   main                                     #
 # -------------------------------------------------------------------------- #
-irules = get_interesting_rules(
+df = get_df_from_rawaudio(
     wav_path=wav_path,
     csv_file=csv_file,
     classes_dict=classes_dict,
@@ -116,6 +113,11 @@ irules = get_interesting_rules(
     header=header,
     id_labels=id_labels,
     label_labels=label_labels,
+    audioparams=audioparams,
+)
+
+irules = get_interesting_rules(
+    df;
     featset=featset,
     audioparams=audioparams,
     min_length=min_length,
@@ -127,4 +129,7 @@ irules = get_interesting_rules(
     rng=rng,
 )
 
-jldsave("respiratory_copd.jld2", true; irules)
+println(irules)
+
+jldsave(jld2_file * ".jld2", true; irules)
+@info "Done."

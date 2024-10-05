@@ -2,10 +2,6 @@ using DataFrames, JLD2
 using SoleAudio, Random
 # using Plots
 
-# TODO
-# scrivi un file text con tutti i settaggi usati
-# output formattato per latex su un file.tex
-
 # -------------------------------------------------------------------------- #
 #                       experiment specific parameters                       #
 # -------------------------------------------------------------------------- #
@@ -16,9 +12,9 @@ csv_path = "/home/paso/datasets/health_recognition/Respiratory_Sound_Database"
 
 csv_file = csv_path * "/" * "patient_diagnosis.csv"
 
-classes = :Pneumonia
+# classes = :Pneumonia
 # classes = :COPD
-# classes = :URTI
+classes = :URTI
 # classes = :Bronchiectasis
 # classes = :Bronchiolitis
 # classes = :resp4bins
@@ -78,14 +74,14 @@ audioparams = let sr = 8000
         speech_detect = false,
         nfft = 256,
         mel_scale = :mel_htk, # :mel_htk, :mel_slaney, :erb, :bark, :semitones, :tuned_semitones
-        mel_nbands = 26,
-        mfcc_ncoeffs = 13,
+        mel_nbands = 32,
+        mfcc_ncoeffs = 16,
         mel_freqrange = (300, round(Int, sr / 2)),
     )
 end
 
-min_length = 310000
-min_samples = 6
+min_length = 120000
+min_samples = 14
 
 features = :catch9
 # features = :minmax

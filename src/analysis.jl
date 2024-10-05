@@ -84,6 +84,7 @@ function propositional_analisys(
     X_propos = DataFrame([name => Float64[] for name in [match(r_select, v)[1] for v in p_variable_names]])
     push!(X_propos, vcat([vcat([map(func, Array(row)) for func in metaconditions]...) for row in eachrow(X)])...)
 
+    println(rng)
     X_train, y_train, X_test, y_test = partitioning(X_propos, y; train_ratio=train_ratio, rng=rng)
 
     @info("Propositional analysis: train model...")
