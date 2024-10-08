@@ -79,5 +79,4 @@ function get_interesting_rules(
     prop_sole_dt = propositional_analisys(X, y, variable_names=variable_names, features=features, train_ratio=train_ratio, rng=rng)
     modal_sole_dt = modal_analisys(X, y; variable_names=variable_names, features=features, nwindows=nwindows, relative_overlap=relative_overlap, train_ratio=train_ratio, rng=rng)
     interesting_rules(prop_sole_dt, modal_sole_dt; features=features, variable_names=variable_names)
-    append_rules(interesting_rules; prop_sole_dt=prop_sole_dt, modal_sole_dt=modal_sole_dt)
 end
