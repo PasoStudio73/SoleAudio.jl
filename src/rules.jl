@@ -18,7 +18,7 @@ r_p_ant = [
     r"^\e\[\d+m▣ ", 
 ]
 r_m_ant = [r"^SyntaxBranch:\s*", r"\e\[(?:1m|0m)", r"^SoleLogics.SyntaxBranch: *"]
-r_var = r"\[V(\d+)\]"
+# r_var = r"\[V(\d+)\]"
 
 format_float(x) = replace(x, r"(\d+\.\d+)" => s -> @sprintf("%.3f", parse(Float64, s)))
 
