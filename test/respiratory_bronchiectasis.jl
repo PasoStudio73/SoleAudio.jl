@@ -71,15 +71,28 @@ label_labels = :Column2
 # -------------------------------------------------------------------------- #
 featset = (:mel, :mfcc, :spectrals)
 
+# audioparams = let sr = 8000
+#     (
+#         sr = sr,
+#         norm = true,
+#         speech_detect = false,
+#         nfft = 256,
+#         mel_scale = :mel_htk, # :mel_htk, :mel_slaney, :erb, :bark, :semitones, :tuned_semitones
+#         mel_nbands = 14,
+#         mfcc_ncoeffs = 7,
+#         mel_freqrange = (300, round(Int, sr / 2)),
+#     )
+# end
+
 audioparams = let sr = 8000
     (
         sr = sr,
         norm = true,
         speech_detect = false,
         nfft = 256,
-        mel_scale = :mel_htk, # :mel_htk, :mel_slaney, :erb, :bark, :semitones, :tuned_semitones
-        mel_nbands = 14,
-        mfcc_ncoeffs = 7,
+        mel_scale = :bark, # :mel_htk, :mel_slaney, :erb, :bark, :semitones, :tuned_semitones
+        mel_nbands = 26,
+        mfcc_ncoeffs = 13,
         mel_freqrange = (300, round(Int, sr / 2)),
     )
 end
@@ -96,8 +109,10 @@ nwindows = 20
 relative_overlap = 0.05
 
 # partitioning
-train_ratio = 0.8
-train_seed = 1
+# train_ratio = 0.8
+# train_seed = 1
+train_ratio = 0.7
+train_seed = 9
 rng = Random.MersenneTwister(train_seed)
 Random.seed!(train_seed)
 

@@ -80,6 +80,8 @@ function interesting_rules(
         map(r->(r, readmetrics(r)), irules)
         m_irules = sort(irules, by=readmetrics)
 
+        isempty(m_irules) && return nothing
+
         m_X = DataFrame(antecedent=String[], consequent=String[]; [name => Vector{Union{Float64, Int}}() for name in keys(readmetrics(m_irules[1]))]..., type=String[])
         for i in eachrow(m_irules)
             consequent = match(r_cons, string(i[1].consequent))[1]
