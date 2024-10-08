@@ -32,9 +32,6 @@ function interesting_rules(
     variable_names::AbstractVector{String},
 )
     if !isnothing(prop_sole_dt)
-        metaconditions = get(propositional_feature_dict, features) do
-            error("Unknown set of features: $features.")
-        end
 
         irules = listrules(
             prop_sole_dt,
