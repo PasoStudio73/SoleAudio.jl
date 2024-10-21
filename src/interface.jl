@@ -32,7 +32,7 @@ function get_df_from_rawaudio(;
         )
     end,
 )
-    isfile(wav_path) || throw(ArgumentError("wav_path '$wav_path' does not exist."))
+    isdir(wav_path) || throw(ArgumentError("wav_path '$wav_path' does not exist."))
 
     df = collect_audio_from_folder(wav_path; audioparams=audioparams, fragmented=fragmented, frag_func=frag_func)
     labels = isnothing(csv_file) ? 
