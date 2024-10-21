@@ -211,7 +211,10 @@ function modal_analisys(
     # model = ModalDecisionTree(; relations = :IA7, features = metaconditions, force_i_variables=true)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
     mach = machine(model, X_train, y_train) |> fit!
     _, mtree = report(mach).sprinkle(X_test, y_test)
+    
+    # report(mach).solemodel(variable_names)
 
-    # ModalDecisionTrees.translate(mtree)
-    mtree
+    # model = ModalDecisionTree(; relations = :IA7, features = metaconditions)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
+    # mach = machine(model, X_train, y_train)
+    # return model, mach
 end
