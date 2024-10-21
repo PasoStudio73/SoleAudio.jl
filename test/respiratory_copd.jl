@@ -2,10 +2,6 @@ using DataFrames, JLD2
 using SoleAudio, Random
 # using Plots
 
-# TODO
-# scrivi un file text con tutti i settaggi usati
-# output formattato per latex su un file.tex
-
 # -------------------------------------------------------------------------- #
 #                       experiment specific parameters                       #
 # -------------------------------------------------------------------------- #
@@ -14,7 +10,7 @@ using SoleAudio, Random
 wav_path ="/home/paso/datasets/health_recognition/Respiratory_Sound_Database/audio_partitioned"
 csv_path = "/home/paso/datasets/health_recognition/Respiratory_Sound_Database"
 
-csv_file = csv_path * "/" * "patient_diagnosis.csv"
+csv_file = csv_path * "/" * "patient_diagnosis_partitioned.csv"
 
 # classes = :Pneumonia
 classes = :COPD
@@ -59,12 +55,9 @@ elseif classes == :resp4bins
     )
 end
 
-fragmented = true
-frag_func(filename) = match(r"^(\d+)", filename)[1]
-
-header = false
-id_labels = :Column1
-label_labels = :Column2
+header = true
+id_labels = :filename
+label_labels = :diagnosis
 
 # -------------------------------------------------------------------------- #
 #                             global parameters                              #
@@ -77,10 +70,23 @@ featset = (:mel, :mfcc, :spectrals)
 #         norm = true,
 #         speech_detect = false,
 #         nfft = 256,
-#         mel_scale = :semitones, # :mel_htk, :mel_slaney, :erb, :bark, :semitones, :tuned_semitones
+#         mel_scale = :mel_htk, # :mel_htk, :mel_slaney, :erb, :bark, :semitones, :tuned_semitones
 #         mel_nbands = 26,
 #         mfcc_ncoeffs = 13,
-#         mel_freqrange = (300, round(Int, sr / 2)),
+#         mel_freqrange = (250, round(Int, sr / 2)),
+#     )
+# end
+
+# audioparams = let sr = 8000
+#     (
+#         sr = sr,
+#         norm = true,
+#         speech_detect = false,
+#         nfft = 256,
+#         mel_scale = :bark, # :mel_htk, :mel_slaney, :erb, :bark, :semitones, :tuned_semitones
+#         mel_nbands = 26,
+#         mfcc_ncoeffs = 13,
+#         mel_freqrange = (250, round(Int, sr / 2)),
 #     )
 # end
 
@@ -93,12 +99,12 @@ audioparams = let sr = 8000
         mel_scale = :erb, # :mel_htk, :mel_slaney, :erb, :bark, :semitones, :tuned_semitones
         mel_nbands = 26,
         mfcc_ncoeffs = 13,
-        mel_freqrange = (300, round(Int, sr / 2)),
+        mel_freqrange = (250, round(Int, sr / 2)),
     )
 end
 
-min_length = 120000
-min_samples = 26
+min_length = 17500
+min_samples = 132
 
 features = :catch9
 # features = :minmax
@@ -109,10 +115,11 @@ nwindows = 20
 relative_overlap = 0.05
 
 # partitioning
-# train_ratio = 0.8
+train_ratio = 0.8
 # train_seed = 1
-train_ratio = 0.7
-train_seed = 9
+# train_seed = 9
+train_seed = 11
+
 rng = Random.MersenneTwister(train_seed)
 Random.seed!(train_seed)
 
@@ -123,8 +130,6 @@ df = get_df_from_rawaudio(
     wav_path=wav_path,
     csv_file=csv_file,
     classes_dict=classes_dict,
-    fragmented=fragmented,
-    frag_func=frag_func,
     header=header,
     id_labels=id_labels,
     label_labels=label_labels,

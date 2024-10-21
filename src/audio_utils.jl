@@ -49,37 +49,14 @@ function walk_audio_dir!(df::DataFrame, path::String; audioparams::NamedTuple)
     end
 end
 
-function _collect_audio_from_folder!(
-    df::DataFrame, 
-    path::String; 
-    audioparams::NamedTuple,
-    fragmented::Bool=false,
-    frag_func::Union{Function, Nothing}=nothing,
-)
-    if !fragmented
-        walk_audio_dir!(df, path; audioparams=audioparams)
-    else
-        !isnothing(frag_func) || throw(ArgumentError("`frag_func` must be provided when `fragmented=true`"))
-
-        @info "Defragmenting audio files..."
-        dff = DataFrame(filename=String[], length=Int64[], audio=AbstractArray{<:AbstractFloat}[])
-        walk_audio_dir!(dff, path; audioparams=audioparams)
-
-        dff.group = map(x -> split(x, "_")[1], dff.filename)
-        grouped_dff = groupby(dff, :group)
-
-        for i in grouped_dff
-            audiodata = vcat(i.audio...)
-            push!(df, hcat(frag_func(i.filename[1]), size(audiodata, 1), [audiodata]))
-        end
-    end
-end
+_collect_audio_from_folder!(df::DataFrame, path::String; audioparams::NamedTuple) = walk_audio_dir!(df, path; audioparams=audioparams)
 
 function collect_audio_from_folder(path::String; kwargs...)
     @info "Collect files..."
     # initialize id path dataframe
     df = DataFrame(filename=String[], length=Int64[], audio=AbstractArray{<:AbstractFloat}[])
     _collect_audio_from_folder!(df, path; kwargs...)
+    
     return df
 end
 

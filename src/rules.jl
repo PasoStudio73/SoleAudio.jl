@@ -18,7 +18,7 @@ r_p_ant = [
     r"^\e\[\d+m▣ ", 
 ]
 r_m_ant = [r"^SyntaxBranch:\s*", r"\e\[(?:1m|0m)", r"^SoleLogics.SyntaxBranch: *"]
-r_var = r"\[V(\d+)\]"
+# r_var = r"\[V(\d+)\]"
 
 format_float(x) = replace(x, r"(\d+\.\d+)" => s -> @sprintf("%.3f", parse(Float64, s)))
 
@@ -38,7 +38,8 @@ function interesting_rules(
             min_lift = 1.0,
             # min_lift = 2.0,
             min_ninstances = 0,
-            min_coverage = 0.10,
+            # min_coverage = 0.10,
+            min_ncovered = 5,
             normalize = true,
         );
         map(r->(consequent(r), readmetrics(r)), irules)
@@ -82,20 +83,25 @@ function interesting_rules(
         m_X = DataFrame(antecedent=String[], consequent=String[]; [name => Vector{Union{Float64, Int}}() for name in keys(readmetrics(m_irules[1]))]..., type=String[])
         for i in eachrow(m_irules)
             consequent = match(r_cons, string(i[1].consequent))[1]
+
             # antecedent = foldl((s, r) -> replace(s, r => ""), r_antecedent, init=string(i[1].antecedent))
             # antecedent = replace(antecedent, r_variable => s -> begin
             #     m = match(r_variable, s)
             #     number = parse(Int, m[1])
             #     "[$(match(r_split, variable_names[number])[2])]"
             # end)
+
             antecedent = begin
                 cleaned_string = reduce((s, r) -> replace(s, r => ""), r_m_ant, init=string(i[1].antecedent))
-                replace(cleaned_string, r_var => s -> begin
-                    number = parse(Int, match(r_var, s)[1])
-                    "[$(match(r_split, variable_names[number])[2])]"
-                end)
+                # replace(cleaned_string, r_var => s -> begin
+                #     number = parse(Int, match(r_var, s)[1])
+                #     "[$(match(r_split, variable_names[number])[2])]"
+                # end)
             end
             antecedent = format_float(antecedent)
+
+            # antecedent = string(i[1].antecedent)
+            
             push!(m_X, (antecedent, consequent, readmetrics(i[1])..., "modal"))
         end
     else

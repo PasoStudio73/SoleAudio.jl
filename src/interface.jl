@@ -7,8 +7,6 @@ function get_df_from_rawaudio(;
     # labels settings
     classes_dict::Dict{String, String},
     classes_func::Union{Function, Nothing}=nothing,
-    fragmented::Bool=false,
-    frag_func::Union{Function, Nothing}=nothing,
     header::Bool=false,
     # merge df labels settings
     sort_before_merge::Bool=true, 
@@ -17,8 +15,7 @@ function get_df_from_rawaudio(;
     label_df::Symbol=:label,
     label_labels::Symbol=:label,
     # audio settings
-    audioparams::NamedTuple=let sr=8000
-        (
+    audioparams::NamedTuple=(
             sr = sr,
             norm = true,
             speech_detect = true,
@@ -30,9 +27,8 @@ function get_df_from_rawaudio(;
             mfcc_ncoeffs = 13,
             mel_freqrange = (0, round(Int, sr / 2)),
         )
-    end,
 )
-    df = collect_audio_from_folder(wav_path; audioparams=audioparams, fragmented=fragmented, frag_func=frag_func)
+    df = collect_audio_from_folder(wav_path; audioparams=audioparams)
     labels = isnothing(csv_file) ? 
         collect_classes(df, classes_dict; classes_func=classes_func) : 
         collect_classes(csv_file, classes_dict; id_labels=id_labels, label_labels=label_labels, header=header)
@@ -79,5 +75,4 @@ function get_interesting_rules(
     prop_sole_dt = propositional_analisys(X, y, variable_names=variable_names, features=features, train_ratio=train_ratio, rng=rng)
     modal_sole_dt = modal_analisys(X, y; variable_names=variable_names, features=features, nwindows=nwindows, relative_overlap=relative_overlap, train_ratio=train_ratio, rng=rng)
     interesting_rules(prop_sole_dt, modal_sole_dt; features=features, variable_names=variable_names)
-    append_rules(interesting_rules; prop_sole_dt=prop_sole_dt, modal_sole_dt=modal_sole_dt)
 end

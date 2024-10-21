@@ -54,21 +54,6 @@ classes_func(row) = match(r"^(?:[^-]*-){2}([^-]*)", row.filename)[1]
 # -------------------------------------------------------------------------- #
 featset = (:mel, :mfcc, :f0, :spectrals)
 
-# audioparams = let sr = 8000
-#     (
-#         sr = sr,
-#         norm = true,
-#         speech_detect = true,
-#         sdetect_thresholds=(0,0), 
-#         sdetect_spread_threshold=0.02,
-#         nfft = 256,
-#         mel_scale = :semitones, # :mel_htk, :mel_slaney, :erb, :bark, :semitones, :tuned_semitones
-#         mel_nbands = 26,
-#         mfcc_ncoeffs = 13,
-#         mel_freqrange = (100, round(Int, sr / 2)),
-#     )
-# end
-
 audioparams = let sr = 8000
     (
         sr = sr,
@@ -77,15 +62,45 @@ audioparams = let sr = 8000
         sdetect_thresholds=(0,0), 
         sdetect_spread_threshold=0.02,
         nfft = 256,
-        mel_scale = :erb, # :mel_htk, :mel_slaney, :erb, :bark, :semitones, :tuned_semitones
+        mel_scale = :mel_htk, # :mel_htk, :mel_slaney, :erb, :bark, :semitones, :tuned_semitones
         mel_nbands = 26,
         mfcc_ncoeffs = 13,
-        mel_freqrange = (100, round(Int, sr / 2)),
+        mel_freqrange = (20, round(Int, sr / 2)),
     )
 end
 
-min_length = 14000
-min_samples = 75
+# audioparams = let sr = 8000
+#     (
+#         sr = sr,
+#         norm = true,
+#         speech_detect = true,
+#         sdetect_thresholds=(0,0), 
+#         sdetect_spread_threshold=0.02,
+#         nfft = 256,
+#         mel_scale = :bark, # :mel_htk, :mel_slaney, :erb, :bark, :semitones, :tuned_semitones
+#         mel_nbands = 26,
+#         mfcc_ncoeffs = 13,
+#         mel_freqrange = (20, round(Int, sr / 2)),
+#     )
+# end
+
+# audioparams = let sr = 8000
+#     (
+#         sr = sr,
+#         norm = true,
+#         speech_detect = true,
+#         sdetect_thresholds=(0,0), 
+#         sdetect_spread_threshold=0.02,
+#         nfft = 256,
+#         mel_scale = :erb, # :mel_htk, :mel_slaney, :erb, :bark, :semitones, :tuned_semitones
+#         mel_nbands = 26,
+#         mfcc_ncoeffs = 13,
+#         mel_freqrange = (20, round(Int, sr / 2)),
+#     )
+# end
+
+min_length = 9500
+min_samples = 632
 
 features = :catch9
 # features = :minmax
@@ -96,10 +111,11 @@ nwindows = 20
 relative_overlap = 0.05
 
 # partitioning
-# train_ratio = 0.8
-# train_seed = 1
-train_ratio = 0.7
-train_seed = 9
+train_ratio = 0.8
+train_seed = 1
+# train_seed = 9
+# train_seed = 11
+
 rng = Random.MersenneTwister(train_seed)
 Random.seed!(train_seed)
 
@@ -128,5 +144,5 @@ irules = get_interesting_rules(
 
 println(irules)
 
-jldsave(jld2_file * ".jld2", true; irules)
-@info "Done."
+# jldsave(jld2_file * ".jld2", true; irules)
+# @info "Done."
