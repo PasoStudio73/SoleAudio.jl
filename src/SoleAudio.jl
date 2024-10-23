@@ -18,6 +18,8 @@ include("interface.jl")
 
 export get_df_from_rawaudio, get_interesting_rules
 
-export collect_audio_from_folder
+# debug
+export collect_audio_from_folder, collect_classes, merge_df_labels!
+export sort_df!, trimlength_df, vnames_builder
 
 end

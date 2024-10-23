@@ -45,18 +45,22 @@ function get_interesting_rules(
     featset::Tuple=(:mel, :mfcc, :f0, :spectrals),
     audioparams::NamedTuple=let sr=8000
         (
-            sr = sr,
-            norm = true,
-            speech_detect = true,
+            sr=sr,
+            norm=true,
+            speech_detect=true,
             sdetect_thresholds=(0,0), 
             sdetect_spread_threshold=0.02,
-            nfft = 256,
-            mel_scale = :mel_htk, # :mel_htk, :mel_slaney, :erb, :bark, :semitones, :tuned_semitones
-            mel_nbands = 26,
-            mfcc_ncoeffs = 13,
-            mel_freqrange = (0, round(Int, sr / 2)),
+            nfft=256,
+            mel_scale=:mel_htk, # :mel_htk, :mel_slaney, :erb, :bark, :semitones, :tuned_semitones
+            mel_nbands=26,
+            mfcc_ncoeffs=13,
+            mel_freqrange=(0, round(Int, sr / 2)),
         )
     end,
+    analysisparams::NamedTuple=(
+        propositional = true,
+        modal = true,
+    ),
     # trim length settings
     splitlabel::Symbol = :label,
     lengthlabel::Symbol=:length,
@@ -72,7 +76,7 @@ function get_interesting_rules(
     sort_df!(df, :length; rev=true)
     df = trimlength_df(df, splitlabel, lengthlabel, audiolabel; min_length=min_length, min_samples=min_samples, sr=audioparams.sr)
     X, y, variable_names = afe(df, featset, audioparams)
-    prop_sole_dt = propositional_analisys(X, y, variable_names=variable_names, features=features, train_ratio=train_ratio, rng=rng)
-    modal_sole_dt = modal_analisys(X, y; variable_names=variable_names, features=features, nwindows=nwindows, relative_overlap=relative_overlap, train_ratio=train_ratio, rng=rng)
-    interesting_rules(prop_sole_dt, modal_sole_dt; features=features, variable_names=variable_names)
+    prop_sole_dt = analysisparams.propositional ? propositional_analisys(X, y, variable_names=variable_names, features=features, train_ratio=train_ratio, rng=rng) : nothing
+    # modal_sole_dt = analysisparams.modal ? modal_analisys(X, y; variable_names=variable_names, features=features, nwindows=nwindows, relative_overlap=relative_overlap, train_ratio=train_ratio, rng=rng) : nothing
+    # interesting_rules(prop_sole_dt, modal_sole_dt; features=features, variable_names=variable_names)
 end

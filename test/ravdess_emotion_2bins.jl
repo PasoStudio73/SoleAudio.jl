@@ -5,8 +5,8 @@ using SoleAudio, Random
 # -------------------------------------------------------------------------- #
 #                       experiment specific parameters                       #
 # -------------------------------------------------------------------------- #
-# wav_path = "/home/paso/Documents/Aclai/Datasets/emotion_recognition/Ravdess/audio_speech_actors_01-24"
-wav_path = "/home/paso/datasets/emotion_recognition/Ravdess/audio_speech_actors_01-24"
+wav_path = "/home/paso/Documents/Aclai/Datasets/emotion_recognition/Ravdess/audio_speech_actors_01-24"
+# wav_path = "/home/paso/datasets/emotion_recognition/Ravdess/audio_speech_actors_01-24"
 
 classes = :emo2bins
 # classes = :emo3bins
@@ -99,6 +99,8 @@ end
 #     )
 # end
 
+analysisparams = (propositional=true, modal=false,)
+
 min_length = 9500
 min_samples = 632
 
@@ -133,6 +135,7 @@ irules = get_interesting_rules(
     df;
     featset=featset,
     audioparams=audioparams,
+    analysisparams=analysisparams,
     min_length=min_length,
     min_samples=min_samples,
     features=features,

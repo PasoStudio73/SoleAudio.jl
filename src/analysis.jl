@@ -54,7 +54,7 @@ f_dict_string = Dict(
     Catch22.SB_TransitionMatrix_3ac_sumdiagcov => "sdiag",
     Catch22.DN_HistogramMode_5 => "hist",
     Catch22.CO_f1ecac => "f1ecac",
-    Catch22.CO_HistogramAMI_even_2_5 => "",
+    Catch22.CO_HistogramAMI_even_2_5 => "hist_even",
 )
 
 Tree = MLJ.@load DecisionTreeClassifier pkg=DecisionTree
@@ -76,9 +76,8 @@ function propositional_analisys(
 
     p_variable_names = [
         string(m[1], f_dict_string[j], "(", m[2], ")", m[3])
-        for i in variable_names
         for j in metaconditions
-        for m in [match(r_split, i)]
+        for m in [match(r_split, i) for i in variable_names]
     ]
     
     X_propos = DataFrame([name => Float64[] for name in [match(r_select, v)[1] for v in p_variable_names]])
