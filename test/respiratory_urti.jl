@@ -5,10 +5,10 @@ using SoleAudio, Random
 # -------------------------------------------------------------------------- #
 #                       experiment specific parameters                       #
 # -------------------------------------------------------------------------- #
-# wav_path ="/home/paso/Documents/Aclai/Datasets/health_recognition/Respiratory_Sound_Database/audio_partitioned"
-# csv_path = "/home/paso/Documents/Aclai/Datasets/health_recognition/Respiratory_Sound_Database"
-wav_path ="/home/paso/datasets/health_recognition/Respiratory_Sound_Database/audio_partitioned"
-csv_path = "/home/paso/datasets/health_recognition/Respiratory_Sound_Database"
+wav_path ="/home/paso/Documents/Aclai/Datasets/health_recognition/Respiratory_Sound_Database/audio_partitioned"
+csv_path = "/home/paso/Documents/Aclai/Datasets/health_recognition/Respiratory_Sound_Database"
+# wav_path ="/home/paso/datasets/health_recognition/Respiratory_Sound_Database/audio_partitioned"
+# csv_path = "/home/paso/datasets/health_recognition/Respiratory_Sound_Database"
 
 csv_file = csv_path * "/" * "patient_diagnosis_partitioned.csv"
 
@@ -64,18 +64,19 @@ label_labels = :diagnosis
 # -------------------------------------------------------------------------- #
 featset = (:mel, :mfcc, :spectrals)
 
-# audioparams = let sr = 8000
-#     (
-#         sr = sr,
-#         norm = true,
-#         speech_detect = false,
-#         nfft = 256,
-#         mel_scale = :mel_htk, # :mel_htk, :mel_slaney, :erb, :bark, :semitones, :tuned_semitones
-#         mel_nbands = 26,
-#         mfcc_ncoeffs = 13,
-#         mel_freqrange = (250, round(Int, sr / 2)),
-#     )
-# end
+audioparams = let sr = 8000
+    (
+        sr = sr,
+        norm = true,
+        speech_detect = false,
+        nfft = 256,
+        mel_scale = :mel_htk, # :mel_htk, :mel_slaney, :erb, :bark, :semitones, :tuned_semitones
+        mel_nbands = 26,
+        mfcc_ncoeffs = 13,
+        mel_freqrange = (250, round(Int, sr / 2)),
+    )
+end
+train_seed = 1
 
 # audioparams = let sr = 8000
 #     (
@@ -89,19 +90,23 @@ featset = (:mel, :mfcc, :spectrals)
 #         mel_freqrange = (250, round(Int, sr / 2)),
 #     )
 # end
+# train_seed = 9
 
-audioparams = let sr = 8000
-    (
-        sr = sr,
-        norm = true,
-        speech_detect = false,
-        nfft = 256,
-        mel_scale = :erb, # :mel_htk, :mel_slaney, :erb, :bark, :semitones, :tuned_semitones
-        mel_nbands = 26,
-        mfcc_ncoeffs = 13,
-        mel_freqrange = (250, round(Int, sr / 2)),
-    )
-end
+# audioparams = let sr = 8000
+#     (
+#         sr = sr,
+#         norm = true,
+#         speech_detect = false,
+#         nfft = 256,
+#         mel_scale = :erb, # :mel_htk, :mel_slaney, :erb, :bark, :semitones, :tuned_semitones
+#         mel_nbands = 26,
+#         mfcc_ncoeffs = 13,
+#         mel_freqrange = (250, round(Int, sr / 2)),
+#     )
+# end
+# train_seed = 11
+
+analysisparams = (propositional=true, modal=false,)
 
 min_length = 14000
 min_samples = 114
@@ -116,9 +121,6 @@ relative_overlap = 0.05
 
 # partitioning
 train_ratio = 0.8
-# train_seed = 1
-# train_seed = 9
-train_seed = 11
 
 rng = Random.MersenneTwister(train_seed)
 Random.seed!(train_seed)
@@ -140,6 +142,7 @@ irules = get_interesting_rules(
     df;
     featset=featset,
     audioparams=audioparams,
+    analysisparams=analysisparams,
     min_length=min_length,
     min_samples=min_samples,
     features=features,

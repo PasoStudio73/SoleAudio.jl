@@ -77,6 +77,6 @@ function get_interesting_rules(
     df = trimlength_df(df, splitlabel, lengthlabel, audiolabel; min_length=min_length, min_samples=min_samples, sr=audioparams.sr)
     X, y, variable_names = afe(df, featset, audioparams)
     prop_sole_dt = analysisparams.propositional ? propositional_analisys(X, y, variable_names=variable_names, features=features, train_ratio=train_ratio, rng=rng) : nothing
-    # modal_sole_dt = analysisparams.modal ? modal_analisys(X, y; variable_names=variable_names, features=features, nwindows=nwindows, relative_overlap=relative_overlap, train_ratio=train_ratio, rng=rng) : nothing
-    # interesting_rules(prop_sole_dt, modal_sole_dt; features=features, variable_names=variable_names)
+    modal_sole_dt = analysisparams.modal ? modal_analisys(X, y; variable_names=variable_names, features=features, nwindows=nwindows, relative_overlap=relative_overlap, train_ratio=train_ratio, rng=rng) : nothing
+    interesting_rules(prop_sole_dt, modal_sole_dt; features=features, variable_names=variable_names)
 end

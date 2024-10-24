@@ -76,6 +76,7 @@ audioparams = let sr = 8000
         mel_freqrange = (250, round(Int, sr / 2)),
     )
 end
+train_seed = 1
 
 # audioparams = let sr = 8000
 #     (
@@ -89,6 +90,7 @@ end
 #         mel_freqrange = (250, round(Int, sr / 2)),
 #     )
 # end
+# train_seed = 9
 
 # audioparams = let sr = 8000
 #     (
@@ -102,8 +104,9 @@ end
 #         mel_freqrange = (250, round(Int, sr / 2)),
 #     )
 # end
+# train_seed = 11
 
-analysisparams = (propositional=true, modal=false,)
+analysisparams = (propositional=true, modal=true,)
 
 min_length = 18000
 min_samples = 88
@@ -118,9 +121,6 @@ relative_overlap = 0.05
 
 # partitioning
 train_ratio = 0.8
-# train_seed = 1
-# train_seed = 9
-train_seed = 11
 
 rng = Random.MersenneTwister(train_seed)
 Random.seed!(train_seed)
